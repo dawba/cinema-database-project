@@ -15,6 +15,29 @@ CREATE TABLE [dbo].[Movies]
   [length] INT NOT NULL,
   [country] VARCHAR(100) NOT NULL,
   [onDisplay] VARCHAR(3) NOT NULL
+) 
+
+IF OBJECT_ID(N'dbo.Actors', N'U') IS NOT NULL  
+   DROP TABLE [dbo].[Actors];  
+GO
+CREATE TABLE [dbo].[Actors]
+(
+  [actorID] INT  NOT NULL IDENTITY(1,1) PRIMARY KEY,
+  [actorName] VARCHAR(100) NOT NULL, 
+  [actorSurname] VARCHAR(100) NOT NULL, 
+  [yearOfBirth] INT NOT NULL, 
+  [gender] VARCHAR(1) NOT NULL,
+  [country] VARCHAR(100) NOT NULL,
+) 
+
+IF OBJECT_ID(N'dbo.Cast', N'U') IS NOT NULL  
+   DROP TABLE [dbo].[Cast];  
+GO
+CREATE TABLE [dbo].[Cast]
+(
+  [movieID] INT NOT NULL,
+  [actorID] INT NOT NULL, 
+  [role] VARCHAR(100) NOT NULL
 )
 
 INSERT INTO Movies (movieTitle,genre,releaseYear,director,length,country,onDisplay)VALUES
@@ -36,3 +59,34 @@ INSERT INTO Movies (movieTitle,genre,releaseYear,director,length,country,onDispl
 ('The Good The Bad and The Ugly','western',1966,'Todd Phillips',179,'Italy','NO'),
 ('Inglourious Basterds','war',2009,'Quentin Tarantino',170,'USA','YES'),
 ('Avatar: The Way of Water','sci-fi',2022,'James Cameron',192,'USA','YES') 
+
+
+INSERT INTO Actors(actorName,actorSurname,yearOfBirth,gender,country) VALUES
+('Marlon','Brando',1924,'M','USA'),
+('Al','Pacino',1940,'M','USA'), 
+('Morgan','Freeman',1937,'M','USA'),
+('Tim','Robbins',1958,'M','USA'),
+('Liam','Neeson',1952,'M','USA'),
+('Embeth', 'Davidtz',1965,'F','USA'),
+('Tom','Hanks',1956,'M','USA'),
+('Robin','Right',1966,'F','USA'),
+('Mark','Hamill',1951,'M','USA'),
+('Harrison','Ford',1942,'M','USA'),
+('Carrie','Fisher',1956,'F','USA'),
+('Anthony' ,'Hopkins',1937,'M','USA'),
+('Jodie','Foster',1962,'F','USA')
+
+INSERT INTO Cast(movieID,actorID,role) VALUES 
+(1,1,'Michael Corleone'),
+(1,2,'Don Vito Corleone'),
+(2,3,'Ellis Boyd "Red" Redding '),
+(2,4,'Andy Dufresne'),
+(3,5,'Oskar Schindler'),
+(3,6,'Helen Hirsch'),
+(4,7,'Forrest Gump'),
+(4,8,'Jenny Curran'),
+(5,9,'Luke Skywalker'),
+(5,10,'Han Solo'),
+(5,11,'Princess Leia'),
+(6,12,'Dr Hannibal Lecter'),
+(6,13,'Clarice Starling')
