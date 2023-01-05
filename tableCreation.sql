@@ -38,7 +38,31 @@ CREATE TABLE [dbo].[Cast]
   [movieID] INT NOT NULL,
   [actorID] INT NOT NULL, 
   [role] VARCHAR(100) NOT NULL
-)
+) 
+
+IF OBJECT_ID(N'dbo.Products', N'U') IS NOT NULL  
+   DROP TABLE [dbo].[Products];  
+GO
+CREATE TABLE [dbo].[Products]
+(
+  [productID] INT  NOT NULL IDENTITY(1,1) PRIMARY KEY,
+  [name] VARCHAR(100) NOT NULL, 
+  [retailPrice] INT NOT NULL, 
+  [wholesalePrice] INT NOT NULL, 
+  [pcsInStock] INT NOT NULL
+) 
+
+IF OBJECT_ID(N'dbo.Licenses', N'U') IS NOT NULL  
+   DROP TABLE [dbo].[Licenses];  
+GO
+CREATE TABLE [dbo].[Licenses]
+(
+  [movieID] INT  NOT NULL ,
+  [studioID] INT NOT NULL, 
+  [beginning] DATE NOT NULL, 
+  [end] DATE NOT NULL, 
+  [price] INT NOT NULL
+) 
 
 INSERT INTO Movies (movieTitle,genre,releaseYear,director,length,country,onDisplay)VALUES
 ('Godfather','crime',1972,'Francis Ford Coppola',170,'USA','YES'),
@@ -79,7 +103,7 @@ INSERT INTO Actors(actorName,actorSurname,yearOfBirth,gender,country) VALUES
 INSERT INTO Cast(movieID,actorID,role) VALUES 
 (1,1,'Michael Corleone'),
 (1,2,'Don Vito Corleone'),
-(2,3,'Ellis Boyd "Red" Redding '),
+(2,3,'Ellis Boyd "Red" Redding'),
 (2,4,'Andy Dufresne'),
 (3,5,'Oskar Schindler'),
 (3,6,'Helen Hirsch'),
@@ -89,4 +113,15 @@ INSERT INTO Cast(movieID,actorID,role) VALUES
 (5,10,'Han Solo'),
 (5,11,'Princess Leia'),
 (6,12,'Dr Hannibal Lecter'),
-(6,13,'Clarice Starling')
+(6,13,'Clarice Starling') 
+
+INSERT INTO Products(name,retailPrice,wholesalePrice,pcsInStock) VALUES
+('fries',15,3,784),
+('popcorn',12,2,1542),
+('nachos',23,6,422),
+('salsa dip',5,1,123),
+('cheese dip',6,2,45),
+('coke',7,1,4561),
+('water',5,1,7842)
+
+
