@@ -137,6 +137,26 @@ CREATE TABLE [dbo].[TransactionList]
     [amount]     INT  NOT NULL,
     [productID]  INT NOT NULL,
 )
+IF OBJECT_ID(N'dbo.Products', N'U') IS NOT NULL
+    DROP TABLE [dbo].[Products];
+GO
+CREATE TABLE [dbo].[Products]
+(
+    [productID]  INT  NOT NULL IDENTITY (1,1) PRIMARY KEY,
+    [name]       VARCHAR(100) NOT NULL,
+    [retailPrice]     INT  NOT NULL,
+    [wholesalePrice]  INT NOT NULL,
+    [pcsInStock]  INT NOT NULL
+) 
+IF OBJECT_ID(N'dbo.Studios', N'U') IS NOT NULL
+    DROP TABLE [dbo].[Studios];
+GO
+CREATE TABLE [dbo].[Studios]
+(
+    [studioID] INT  NOT NULL IDENTITY (1,1) PRIMARY KEY,
+    [studioName]       VARCHAR(100) NOT NULL,
+    [contactInfo]     VARCHAR(100)  NOT NULL
+)
 
 INSERT INTO Movies (movieTitle, genre, releaseYear, director, length, country, onDisplay)
 VALUES ('Godfather', 'crime', 1972, 'Francis Ford Coppola', 170, 'USA', 'YES'),
@@ -198,7 +218,7 @@ INSERT INTO Products(name,retailPrice,wholesalePrice,pcsInStock) VALUES
 ('coke',7,1,4561),
 ('water',5,1,7842)
 
-INSERT INTO Licenses(studioName,contactInfo) VALUES
+INSERT INTO Studios(studioName,contactInfo) VALUES
 ('Paramount Pictures','Carl Warback - 987883737'),
 ('Columbia Pictures','John Dew - 564206988'),
 ('Universal Pictures','')
