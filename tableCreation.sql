@@ -167,8 +167,29 @@ CREATE TABLE [dbo].[Licenses]
     [start]     DATE  NOT NULL,
     [finish] DATE NOT NULL, 
     [price] INT NOT NULL
-)
+) 
 
+IF OBJECT_ID(N'dbo.Orders', N'U') IS NOT NULL
+    DROP TABLE [dbo].[Orders];
+GO
+CREATE TABLE [dbo].[Orders]
+(
+    [productID] INT  NOT NULL ,
+    [quantity]   INT NOT NULL,
+    [orderPrice]    INT  NOT NULL,
+    [orderDate] DATE NOT NULL, 
+    [status] VARCHAR(20) NOT NULL
+)  
+
+IF OBJECT_ID(N'dbo.Halls', N'U') IS NOT NULL
+    DROP TABLE [dbo].[Halls];
+GO
+CREATE TABLE [dbo].[Halls]
+(
+    [hallID] INT  NOT NULL IDENTITY (1,1) PRIMARY KEY,
+    [colour]       VARCHAR(100) NOT NULL,
+    [capacity]     INT  NOT NULL
+) 
 
 INSERT INTO Movies (movieTitle, genre, releaseYear, director, length, country, onDisplay)
 VALUES ('Godfather', 'crime', 1972, 'Francis Ford Coppola', 170, 'USA', 'YES'),
@@ -247,3 +268,17 @@ INSERT INTO Licenses(studioID,movieID,start,finish,price) VALUES
 (4,5,N'1999-01-10',N'2017-02-19',10000),
 (5,6,N'1978-01-10',N'2018-02-19',13000),
 (6,7,N'2013-01-10',N'2019-03-29',100400)
+
+INSERT INTO Orders(productID,quantity,orderPrice,orderDate,[status]) VALUES
+(1,790,3*790,N'2022-01-15','1'),
+(2,1550,3100,N'2022-01-15','1'),
+(3,430,6*430,N'2022-01-15','1'),
+(4,125,125,N'2022-01-15','1'),
+(5,50,100,N'2022-01-15','1'),
+(6,4570,4570,N'2022-01-15','1'),
+(7,7850,7850,N'2022-01-15','1') 
+
+INSERT INTO Halls(colour,capacity) VALUES
+('blue',10),
+('red',20),
+('green',30)
