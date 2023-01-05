@@ -2,7 +2,7 @@ IF EXISTS(select *
           from sys.databases
           where name = 'Cinema')
     DROP DATABASE Cinema
-CREATE DATABASE Cinema
+CREATE DATABASE Cinema 
 
 IF OBJECT_ID(N'dbo.Movies', N'U') IS NOT NULL
     DROP TABLE [dbo].[Movies];
@@ -156,7 +156,19 @@ CREATE TABLE [dbo].[Studios]
     [studioID] INT  NOT NULL IDENTITY (1,1) PRIMARY KEY,
     [studioName]       VARCHAR(100) NOT NULL,
     [contactInfo]     VARCHAR(100)  NOT NULL
+) 
+IF OBJECT_ID(N'dbo.Licenses', N'U') IS NOT NULL
+    DROP TABLE [dbo].[Licenses];
+GO
+CREATE TABLE [dbo].[Licenses]
+(
+    [studioID] INT  NOT NULL ,
+    [movieID]       INT NOT NULL,
+    [start]     DATE  NOT NULL,
+    [finish] DATE NOT NULL, 
+    [price] INT NOT NULL
 )
+
 
 INSERT INTO Movies (movieTitle, genre, releaseYear, director, length, country, onDisplay)
 VALUES ('Godfather', 'crime', 1972, 'Francis Ford Coppola', 170, 'USA', 'YES'),
@@ -221,4 +233,17 @@ INSERT INTO Products(name,retailPrice,wholesalePrice,pcsInStock) VALUES
 INSERT INTO Studios(studioName,contactInfo) VALUES
 ('Paramount Pictures','Carl Warback - 987883737'),
 ('Columbia Pictures','John Dew - 564206988'),
-('Universal Pictures','')
+('Universal Pictures','Grubolini Gruby - 42069999292'),
+('United Artists','Jan Kowalski - 12342534534'),
+('Lucasfilms','Darth Vader - 666666666'),
+('Orion Pictures','Hannie Lecture 452165154')
+
+
+INSERT INTO Licenses(studioID,movieID,start,finish,price) VALUES
+(1,1,N'2020-10-10',N'2022-12-15',12000),
+(1,4,N'2017-01-10',N'2023-12-09',154200),
+(2,2,N'2015-01-10',N'2022-11-12',17500),
+(3,3,N'2021-01-17',N'2023-05-17',17125),
+(4,5,N'1999-01-10',N'2017-02-19',10000),
+(5,6,N'1978-01-10',N'2018-02-19',13000),
+(6,7,N'2013-01-10',N'2019-03-29',100400)
