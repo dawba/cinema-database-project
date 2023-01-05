@@ -187,4 +187,18 @@ VALUES (1, 1, 'Michael Corleone'),
        (5, 10, 'Han Solo'),
        (5, 11, 'Princess Leia'),
        (6, 12, 'Dr Hannibal Lecter'),
-       (6, 13, 'Clarice Starling')
+       (6, 13, 'Clarice Starling') 
+
+INSERT INTO Products(name,retailPrice,wholesalePrice,pcsInStock) VALUES
+('fries',15,3,784),
+('popcorn',12,2,1542),
+('nachos',23,6,422),
+('salsa dip',5,1,123),
+('cheese dip',6,2,45),
+('coke',7,1,4561),
+('water',5,1,7842)
+
+INSERT INTO Licenses(studioName,contactInfo) VALUES
+('Paramount Pictures','Carl Warback - 987883737'),
+('Columbia Pictures','John Dew - 564206988'),
+('Universal Pictures','')
