@@ -225,7 +225,20 @@ VALUES ('Marlon', 'Brando', 1924, 'M', 'USA'),
        ('Harrison', 'Ford', 1942, 'M', 'USA'),
        ('Carrie', 'Fisher', 1956, 'F', 'USA'),
        ('Anthony', 'Hopkins', 1937, 'M', 'USA'),
-       ('Jodie', 'Foster', 1962, 'F', 'USA')
+       ('Jodie', 'Foster', 1962, 'F', 'USA'),
+	   ('François', 'Cluzet',1955,'M','France'),
+    ('Brad','Pitt',1963,'M','USA'),
+    ('Robert','De Niro',1943,'M','USA'),
+    ('Leonardo','Di Caprio',1974,'M','USA'),
+    ('Clint','Eastwood',1930,'M','USA'), 
+    ('Matt','Damon',1970,'M','USA'),
+    ('Jean','Reno',1948,'M','France'),
+    ('Kate','Winslet',1975,'F','USA')
+		
+
+
+		
+		
 
 INSERT INTO Cast(movieID, actorID, role)
 VALUES (1, 1, 'Michael Corleone'),
@@ -240,7 +253,17 @@ VALUES (1, 1, 'Michael Corleone'),
        (5, 10, 'Han Solo'),
        (5, 11, 'Princess Leia'),
        (6, 12, 'Dr Hannibal Lecter'),
-       (6, 13, 'Clarice Starling') 
+       (6, 13, 'Clarice Starling'),
+	    (7, 14, 'Philippe'),
+		(9, 15, 'Tyler Durden'),
+		(10, 16, 'Murray Franklin'),
+		(11, 17, 'Calvin Candie'),
+		(12, 18, 'Walt Kowalski'),
+		(13, 19, 'Will Hunting'),
+		(14, 20, 'Leon'), 
+		(15,18,'the Man with No Name'),
+		(16,15,'Lieutenant Aldo Raine'),
+		(18,21,'Ronal')
 
 INSERT INTO Products(name,retailPrice,wholesalePrice,pcsInStock) VALUES
 ('fries',15,3,784),
@@ -257,7 +280,15 @@ INSERT INTO Studios(studioName,contactInfo) VALUES
 ('Universal Pictures','Grubolini Gruby - 42069999292'),
 ('United Artists','Jan Kowalski - 12342534534'),
 ('Lucasfilms','Darth Vader - 666666666'),
-('Orion Pictures','Hannie Lecture 452165154')
+('Orion Pictures','Hannie Lecture 452165154'),
+('Gaumont','Adrian Nowak - 93883899823'),
+ ('Melampo Cinematografica','Zalno Adrian - 3259235'),
+ ('20th Century Fox','Patt Bridd - 983453452'),
+ ('Warner Bros Pictures','Matheo Moravietti - 298352983'), 
+ ('Miramax Films','Matheo Demonno - 2123352983'), 
+ ('Les Films du Dauphin','Bildung Ist - 1123352983')
+ 
+ 
 
 
 INSERT INTO Licenses(studioID,movieID,start,finish,price) VALUES
@@ -267,7 +298,21 @@ INSERT INTO Licenses(studioID,movieID,start,finish,price) VALUES
 (3,3,N'2021-01-17',N'2023-05-17',17125),
 (4,5,N'1999-01-10',N'2017-02-19',10000),
 (5,6,N'1978-01-10',N'2018-02-19',13000),
-(6,7,N'2013-01-10',N'2019-03-29',100400)
+(6,7,N'2013-01-10',N'2019-03-29',100400),
+(7,8,N'2014-01-10',N'2016-03-29',14400),
+(8,9,N'2003-01-10',N'2021-03-29',177400),
+(9,10,N'2013-01-10',N'2022-03-29',17400),
+(10,11,N'2019-01-10',N'2022-03-19',23400),
+(2,12,N'2012-01-10',N'2024-03-19',144300),
+(10,13,N'2014-31-12',N'2023-05-19',233400),
+(11,14,N'2012-31-12',N'2023-10-19',123400),
+(12,15,N'2022-31-12',N'2023-10-19',1234),
+(9,16,N'2008-31-12',N'2022-10-19',15234),
+(3,17,N'2018-31-12',N'2022-10-19',185234),
+(9,18,N'2018-31-12',N'2022-10-19',185234)
+
+
+
 
 INSERT INTO Orders(productID,quantity,orderPrice,orderDate,[status]) VALUES
 (1,790,3*790,N'2022-01-15','1'),
