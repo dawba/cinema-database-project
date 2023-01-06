@@ -101,7 +101,7 @@ CREATE TABLE [dbo].[Showings]
 (
     [showingID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [hallID] INT NOT NULL,
-    [moveID] INT NOT NULL,
+    [movieID] INT NOT NULL,
     [date] DATE NOT NULL,
     [standardPrice] INT NOT NULL,
     [reducedPrice] INT NOT NULL,
@@ -273,26 +273,26 @@ VALUES
 
 
 INSERT INTO Licenses
-    (studioID, movieID, start, finish, price)
+    (studioID, movieID, [start], finish, price)
 VALUES
-    (1, 1, N'2020-10-10', N'2022-12-15', 12000),
-    (1, 4, N'2017-01-10', N'2023-12-09', 154200),
-    (2, 2, N'2015-01-10', N'2022-11-12', 17500),
-    (3, 3, N'2021-01-17', N'2023-05-17', 17125),
-    (4, 5, N'1999-01-10', N'2017-02-19', 10000),
-    (5, 6, N'1978-01-10', N'2018-02-19', 13000),
-    (6, 7, N'2013-01-10', N'2019-03-29', 100400),
-    (7, 8, N'2014-01-10', N'2016-03-29', 14400),
-    (8, 9, N'2003-01-10', N'2021-03-29', 177400),
-    (9, 10, N'2013-01-10', N'2022-03-29', 17400),
-    (10, 11, N'2019-01-10', N'2022-03-19', 23400),
-    (2, 12, N'2012-01-10', N'2024-03-19', 144300),
-    (10, 13, N'2014-31-12', N'2023-05-19', 233400),
-    (11, 14, N'2012-31-12', N'2023-10-19', 123400),
-    (12, 15, N'2022-31-12', N'2023-10-19', 1234),
-    (9, 16, N'2008-31-12', N'2022-10-19', 15234),
-    (3, 17, N'2018-31-12', N'2022-10-19', 185234),
-    (9, 18, N'2018-31-12', N'2022-10-19', 185234)
+    (1, 1, '2020-10-10', '2022-12-15', 12000),
+    (1, 4, '2017-01-10', '2023-12-09', 154200),
+    (2, 2, '2015-01-10', '2022-11-12', 17500),
+    (3, 3, '2021-01-17', '2023-05-17', 17125),
+    (4, 5, '1999-01-10', '2017-02-19', 10000),
+    (5, 6, '1978-01-10', '2018-02-19', 13000),
+    (6, 7, '2013-01-10', '2019-03-29', 100400),
+    (7, 8, '2014-01-10', '2016-03-29', 14400),
+    (8, 9, '2003-01-10', '2021-03-29', 177400),
+    (9, 10, '2013-01-10', '2022-03-29', 17400),
+    (10, 11, '2019-01-10', '2022-03-19', 23400),
+    (2, 12, '2012-01-10', '2024-03-19', 144300),
+    (10, 13, '2014-01-12', '2023-05-19', 233400),
+    (11, 14, '2012-02-12', '2023-10-19', 123400),
+    (12, 15, '2022-04-12', '2023-10-19', 1234),
+    (9, 16, '2008-03-12', '2022-10-19', 15234),
+    (3, 17, '2018-07-12', '2022-10-19', 185234),
+    (9, 18, '2018-07-12', '2022-10-19', 185234)
 
 
 INSERT INTO Orders
@@ -905,3 +905,28 @@ VALUES
     (10, '2022-01-12 12:00:00', '2022-01-12 13:00:00'),
     (10, '2022-01-17 12:00:00', '2022-01-17 16:00:00'),
     (10, '2022-01-24 13:00:00', '2022-01-24 16:00:00')
+
+--trigger sprawdzajacy przy dodawaniu seansu, czy na dany film jest wykupiona licencja 
+
+IF OBJECT_ID ('LicenseCheck', 'TR') IS NOT NULL  
+   DROP TRIGGER LicenseCheck;  
+GO
+CREATE TRIGGER LicenseCheck
+ON Showings
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF
+    ( (SELECT finish FROM Licenses L JOIN INSERTED I  ON L.movieID = I.movieID ) > (SELECT [date] from inserted))
+      INSERT INTO Showings  
+      (hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought) 
+      SELECT hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought FROM INSERTED
+     ELSE 
+     PRINT('License for this movie has expired!')
+END
+GO
+
+INSERT INTO Showings  
+      (hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought) 
+      VALUES
+      (1,1,'2023-01-05',25,20,0)
