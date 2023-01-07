@@ -929,4 +929,47 @@ GO
 INSERT INTO Showings  
       (hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought) 
       VALUES
-      (1,1,'2023-01-05',25,20,0)
+      (1,1,'2023-01-05',25,20,0) 
+
+--trigger obnizajacy stan magazynowy danego produktu  po transakcji
+ IF OBJECT_ID ('ProductSold', 'TR') IS NOT NULL  
+   DROP TRIGGER ProductSold;  
+GO
+CREATE TRIGGER ProductSold
+ON TransactionList
+AFTER INSERT 
+AS 
+BEGIN
+UPDATE Products 
+SET pcsInStock = (pcsInStock - (SELECT amount FROM inserted)) 
+WHERE Products.productID = (SELECT productID from inserted)
+END 
+GO 
+--trigger zwiekszajacy stan produktu po zamowieniu 
+ IF OBJECT_ID ('ProductOrdered', 'TR') IS NOT NULL  
+   DROP TRIGGER ProductOrdered;  
+GO
+CREATE TRIGGER ProductOrdered
+ON Orders
+AFTER INSERT 
+AS 
+BEGIN
+UPDATE Products 
+SET pcsInStock = (pcsInStock + (SELECT quantity FROM inserted)) 
+WHERE Products.productID = (SELECT productID from inserted)
+END 
+GO 
+--trigger zwiekszajacy liczbe kjupionych biletow po dokonaniu rezerwacji
+IF OBJECT_ID ('TicketSold', 'TR') IS NOT NULL  
+   DROP TRIGGER TicketSold;  
+GO
+CREATE TRIGGER TicketSold
+ON Reservations
+AFTER INSERT 
+AS 
+BEGIN
+UPDATE Showings 
+SET ticketsBought = (ticketsBought + 1) 
+WHERE Showings.showingID = (SELECT showingID from inserted)
+END 
+GO 
