@@ -102,7 +102,7 @@ CREATE TABLE [dbo].[Showings]
     [showingID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [hallID] INT NOT NULL,
     [movieID] INT NOT NULL,
-    [date] DATE NOT NULL,
+    [date] DATETIME NOT NULL,
     [standardPrice] INT NOT NULL,
     [reducedPrice] INT NOT NULL,
     [ticketsBought] INT NOT NULL
@@ -275,7 +275,7 @@ VALUES
 INSERT INTO Licenses
     (studioID, movieID, [start], finish, price)
 VALUES
-    (1, 1, '2020-10-10', '2022-12-15', 12000),
+    (1, 1, '2020-10-10', '2023-12-15', 12000),
     (1, 4, '2017-01-10', '2023-12-09', 154200),
     (2, 2, '2015-01-10', '2022-11-12', 17500),
     (3, 3, '2021-01-17', '2023-05-17', 17125),
@@ -929,7 +929,7 @@ GO
 INSERT INTO Showings  
       (hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought) 
       VALUES
-      (1,1,'2023-01-05',25,20,0) 
+      (1,1,'2022-01-16 12:32',25,20,0) 
 
 --trigger obnizajacy stan magazynowy danego produktu  po transakcji
  IF OBJECT_ID ('ProductSold', 'TR') IS NOT NULL  
@@ -972,4 +972,28 @@ UPDATE Showings
 SET ticketsBought = (ticketsBought + 1) 
 WHERE Showings.showingID = (SELECT showingID from inserted)
 END 
+GO  
+
+--funkcja pokazująca repertuar kina w danym przedziale czasowym
+DROP FUNCTION IF EXISTS dbo.cinemaRepertoire;
 GO 
+CREATE FUNCTION cinemaRepertoire (@start DATE, @finish DATE)
+RETURNS @repertoire TABLE
+(
+	[Date] DATETIME,
+	Movie NVARCHAR(50),
+	Hall NVARCHAR(10),
+	noOfFreeSeats INT
+)
+AS
+BEGIN
+	INSERT INTO @repertoire 
+        SELECT S.[date],M.movieTitle,H.colour,H.capacity - S.ticketsBought 
+        FROM Showings S JOIN Movies M ON S.movieID = M.movieID
+        JOIN Halls H ON H.hallID = S.hallID 
+        WHERE S.[date] BETWEEN @start AND @finish 
+	RETURN
+END 
+GO 
+
+SELECT * FROM cinemaRepertoire('2022-01-12','2023-12-03')
