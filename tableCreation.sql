@@ -1,9 +1,9 @@
-IF EXISTS(
+/*IF EXISTS(
     select *
 from sys.databases
 where name = 'Cinema'
 ) DROP DATABASE Cinema
-CREATE DATABASE Cinema
+CREATE DATABASE Cinema*/
 IF OBJECT_ID(N'dbo.Movies', N'U') IS NOT NULL DROP TABLE [dbo].[Movies];
 GO
 CREATE TABLE [dbo].[Movies]
@@ -310,7 +310,7 @@ VALUES
 INSERT INTO Halls
     (colour, capacity)
 VALUES
-    ('blue', 10),
+    ('blue', 12),
     ('red', 20),
     ('green', 30)  
 
@@ -734,13 +734,15 @@ VALUES
     (1, 1, 1),
     (1, 1, 2),
     (1, 1, 3),
+    (1, 1, 4),
+    (1, 2, 1),
+    (1, 2, 2),
+    (1, 2, 3),
     (1, 2, 4),
-    (1, 2, 5),
-    (1, 2, 6),
-    (1, 3, 7),
-    (1, 3, 8),
-    (1, 3, 9),
-    (1, 3, 10),
+    (1, 3, 1),
+    (1, 3, 2),
+    (1, 3, 3),
+    (1, 3, 4),
     (2, 1, 1),
     (2, 1, 2),
     (2, 1, 3),
@@ -762,9 +764,10 @@ VALUES
     (2, 5, 1),
     (2, 5, 1),
     (3, 1, 1),
-    (3, 1, 1),
     (3, 1, 2),
     (3, 1, 3),
+    (3, 1, 4),
+    (3, 1, 5),
     (3, 2, 1),
     (3, 2, 2),
     (3, 2, 3),
@@ -774,6 +777,7 @@ VALUES
     (3, 3, 2),
     (3, 3, 3),
     (3, 3, 4),
+    (3, 3, 5),
     (3, 4, 1),
     (3, 4, 2),
     (3, 4, 3),
@@ -783,14 +787,13 @@ VALUES
     (3, 5, 2),
     (3, 5, 3),
     (3, 5, 4),
+    (3, 5, 5),
     (3, 6, 1),
     (3, 6, 2),
     (3, 6, 3),
     (3, 6, 4),
-    (3, 6, 5),
-    (3, 7, 1),
-    (3, 7, 2),
-    (3, 7, 3)
+    (3, 6, 5)
+    
 
 INSERT INTO Employees(name, surname, sex, dateOfBirth, postID)
 VALUES
@@ -961,7 +964,7 @@ END
 GO 
 --trigger zwiekszajacy liczbe kjupionych biletow po dokonaniu rezerwacji
 IF OBJECT_ID ('TicketSold', 'TR') IS NOT NULL  
-   DROP TRIGGER TicketSold;  
+   DROP TRIGGER TicketSold;  --do zrobienia sprawdzanie czy sawolne miejsca, czy dane miejsce jest wolne
 GO
 CREATE TRIGGER TicketSold
 ON Reservations
@@ -997,3 +1000,85 @@ END
 GO 
 
 SELECT * FROM cinemaRepertoire('2022-01-12','2023-12-03')
+
+--funkcja pokazujaca rozklad wolnych miejsc na dany seans  
+
+
+IF OBJECT_ID(N'dbo.Test', N'U') IS NOT NULL DROP TABLE [dbo].[Test];
+GO
+CREATE TABLE [dbo].[Test]
+(
+    [Row] VARCHAR(3)
+)
+INSERT INTO Test 
+SELECT S.row as [Row] FROM Seats S 
+WHERE S.hallID = 1  
+GROUP BY S.row 
+DECLARE @X INT 
+SET @X = 1 
+DECLARE @addcol VARCHAR(100)
+WHILE(@X <= (SELECT MAX(S.seatNumber) FROM Seats S WHERE hallID = 1 ))
+    BEGIN
+        SET @addcol = 'ALTER TABLE Test ADD ' + CONCAT('S',CAST(@X AS VARCHAR)) + ' INT' 
+        SET @X = @X +1 
+        exec(@addcol)
+    END 
+SET @X = 1
+DECLARE @altercol VARCHAR(1000)
+WHILE(@X <= (SELECT MAX(S.seatNumber) FROM Seats S WHERE hallID = 1 ))
+    BEGIN
+        SET @altercol = 
+        'UPDATE Test SET TEST.[S' + CAST(@X AS VARCHAR) + '] = (SELECT S.seatID FROM Seats S WHERE S.hallID = 1 AND S.seatNumber = '+CAST(@X AS VARCHAR)+' AND S.[row] = Test.[Row] )'
+        exec(@altercol)
+        SET @altercol = 'UPDATE Test SET Test.[S'+ CAST(@X AS VARCHAR) +'] = -1
+                        WHERE EXISTS(SELECT * FROM Reservations R WHERE R.showingID = 1 AND R.seatID = Test.[S'+ CAST(@X AS VARCHAR) +'] )'
+        exec(@altercol)
+        SET @X = @X +1 
+    END 
+
+
+SELECT * FROM Test  
+SELECT * FROM Seats
+SELECT S.row,S.seatNumber FROM Seats S WHERE hallID = 1  
+SELECT * FROM Reservations WHERE showingID = 1
+/*GO 
+CREATE PROC freeSeats 
+(@showingID INT)
+AS 
+DECLARE @hall INT
+SET @hall = (SELECT DISTINCT  S.hallID FROM Showings S WHERE S.showingID = @showingID)
+IF OBJECT_ID(N'dbo.Test', N'U') IS NOT NULL DROP TABLE [dbo].[Test];
+GO
+CREATE TABLE [dbo].[Test]
+(
+    [Row] VARCHAR(3)
+)
+INSERT INTO Test 
+SELECT S.row as [Row] FROM Seats S 
+WHERE S.hallID = 1  
+GROUP BY S.row 
+DECLARE @X INT 
+SET @X = 1 
+DECLARE @addcol VARCHAR(100)
+WHILE(@X <= (SELECT MAX(S.seatNumber) FROM Seats S WHERE hallID = @hall ))
+    BEGIN
+        SET @addcol = 'ALTER TABLE Test ADD ' + CONCAT('S',CAST(@X AS VARCHAR)) + ' INT' 
+        SET @X = @X +1 
+        exec(@addcol)
+    END 
+SET @X = 1
+DECLARE @altercol VARCHAR(1000)
+WHILE(@X <= (SELECT MAX(S.seatNumber) FROM Seats S WHERE hallID = @hall ))
+    BEGIN
+        SET @altercol = 
+        'UPDATE Test SET TEST.[S' + CAST(@X AS VARCHAR) + '] = (SELECT S.seatID FROM Seats S WHERE S.hallID = 1 AND S.seatNumber = '+CAST(@X AS VARCHAR)+' AND S.[row] = Test.[Row] )'
+        exec(@altercol)
+        SET @altercol = 'UPDATE Test SET Test.[S'+ CAST(@X AS VARCHAR) +'] = -1
+                        WHERE EXISTS(SELECT * FROM Reservations R WHERE R.showingID = @showingID AND R.seatID = Test.[S'+ CAST(@X AS VARCHAR) +'] )'
+        exec(@altercol)
+        SET @X = @X +1 
+    END 
+
+
+SELECT * FROM Test 
+GO */
