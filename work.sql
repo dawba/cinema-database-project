@@ -1139,6 +1139,44 @@ SELECT TOP 1 E.name, E.surname, COUNT(R.employeeID) FROM Reservations R
 JOIN Employees E ON(E.employeeID = R.employeeID)
 GROUP BY E.name, E.surname
 
+
+
+-- widok wyswietlajacy aktualny stan magazynowy 
+SELECT P.name, P.pcsInStock FROM Products P
+GROUP BY P.name, P.pcsInStock ORDER BY P.pcsInStock DESC
+
+-- sprzedaz internetowa vs stacjonarna
+SELECT M.movieTitle, S.[date], COUNT(R.employeeID) AS [sold by employees], S.ticketsBought - COUNT(R.employeeID) AS [sold online] FROM Reservations R
+JOIN Showings S ON(R.showingID = S.showingID)
+JOIN Movies M ON(S.movieID = M.movieID)
+GROUP BY R.showingID, S.ticketsBought, M.movieTitle, S.[date]
+ORDER BY S.[date] ASC
+
+
+----------------------------------------------------------------------------
+-- widok kontaktow do wytworni, dla ktorych mamy filmy bez licencji
+-- dodac ten widok do triggera???
+GO
+CREATE View [contactToStudiosForNewLicenses] AS
+    SELECT M.movieTitle, S.studioName, S.contactInfo, L.price FROM Licenses L
+    JOIN Movies M ON(L.movieID = M.movieID)
+    JOIN Studios S ON(S.studioID = L.movieID)
+    WHERE GETDATE() >= (SELECT finish FROM Licenses WHERE Licenses.movieID = L.movieID)
+GO
+
+DROP View [contactToStudiosForNewLicenses]
+----------------------------------------------------------------------------
+-- widzowie, ktorzy wyrazili zgode na otrzymywanie newslettera
+-- i podali swojego maila
+GO
+CREATE View [clientsWithNewsletter] AS
+    SELECT * FROM Clients C
+    WHERE C.newsletter = 1
+GO
+
+DROP VIEW [clientsWithNewsletter]
+
+----------------------------------------------------------------------------
 -- bilans pensji dla pracownikow dla konkretnego miesiąca i roku
 DROP FUNCTION IF EXISTS dbo.employeeSalary;
 GO
@@ -1170,43 +1208,4 @@ END
 GO
 
 SELECT * FROM employeeSalary(20222, 1)
-
--- widzowie, ktorzy maja maila w domenie gmail lub wp
-SELECT * FROM Clients C
-WHERE C.email LIKE '%gmail.com' OR C.email LIKE '%wp.pl'
-
--- pracownik ktory spedzil noc w kinie
-SELECT E.name, E.surname, P.post, S.[start], S.[end] FROM Shifts S
-JOIN Employees E ON(S.employeeID = E.employeeID)
-JOIN Posts P ON(P.postID = E.postID)
-WHERE DAY(S.[end]) - DAY(S.[start]) > 0
-GROUP BY E.name, E.surname, P.post, S.[start], S.[end]
-
-
--- widok wyswietlajacy aktualny stan magazynowy 
-SELECT P.name, P.pcsInStock FROM Products P
-GROUP BY P.name, P.pcsInStock ORDER BY P.pcsInStock DESC
-
--- sprzedaz internetowa vs stacjonarna
-SELECT M.movieTitle, S.[date], COUNT(R.employeeID) AS [sold by employees], S.ticketsBought - COUNT(R.employeeID) AS [sold online] FROM Reservations R
-JOIN Showings S ON(R.showingID = S.showingID)
-JOIN Movies M ON(S.movieID = M.movieID)
-GROUP BY R.showingID, S.ticketsBought, M.movieTitle, S.[date]
-ORDER BY S.[date] ASC
-
-
--- widok kontaktow do wytworni, dla ktorych mamy filmy bez licencji
--- dodac ten widok do triggera???
-SELECT M.movieTitle, S.studioName, S.contactInfo, L.price FROM Licenses L
-JOIN Movies M ON(L.movieID = M.movieID)
-JOIN Studios S ON(S.studioID = L.movieID)
-WHERE GETDATE() >= (SELECT finish FROM Licenses WHERE Licenses.movieID = L.movieID)
-
-
-GO
-CREATE View [Most attended movies] AS
-    SELECT M.movieTitle FROM Showings S
-    JOIN Movies M ON(S.movieID = M.movieID)
-GO
-
-DROP VIEW [Most attended movies]
+----------------------------------------------------------------------------
