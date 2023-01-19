@@ -1145,26 +1145,51 @@ GROUP BY E.name, E.surname
 SELECT P.name, P.pcsInStock FROM Products P
 GROUP BY P.name, P.pcsInStock ORDER BY P.pcsInStock DESC
 
--- sprzedaz internetowa vs stacjonarna
-SELECT M.movieTitle, S.[date], COUNT(R.employeeID) AS [sold by employees], S.ticketsBought - COUNT(R.employeeID) AS [sold online] FROM Reservations R
-JOIN Showings S ON(R.showingID = S.showingID)
-JOIN Movies M ON(S.movieID = M.movieID)
-GROUP BY R.showingID, S.ticketsBought, M.movieTitle, S.[date]
-ORDER BY S.[date] ASC
+----------------------------------------------------------------------------
+-- funkcja wyswietlajaca statystyki sprzedazy biletow dla wybranego [roku, miesiaca, filmu]
+-- gdzie poszczegolne argumenty moga przyjmowac wartosc NULL
+-- tzn [NULL, NULL, NULL] zwroci statystyki dla wszystkich seansow itd...
+DROP FUNCTION IF EXISTS dbo.ticketSaleStatisticComparison;
+GO
+CREATE FUNCTION ticketSaleStatisticComparison (@year INT, @month INT, @movieTitle NVARCHAR(50))
+RETURNS @TicketSaleStatistics TABLE
+(
+    [movieTitle] NVARCHAR(50),
+    [date] DATE,
+    [sold by employees] INT,
+    [sold online] INT
+)
+AS
+BEGIN
+    INSERT INTO @TicketSaleStatistics
+    SELECT M.movieTitle, S.[date],
+        COUNT(R.employeeID) AS [sold by employees], 
+        S.ticketsBought - COUNT(R.employeeID) AS [sold online] 
+    FROM Reservations R
+    JOIN Showings S ON(R.showingID = S.showingID)
+    JOIN Movies M ON(S.movieID = M.movieID)
+    WHERE ((@year IS NOT NULL AND YEAR(S.[date]) = @year) OR (@year IS NULL))
+            AND((@month IS NOT NULL AND MONTH(S.[date]) = @month) OR (@month IS NULL))
+            AND((@movieTitle IS NOT NULL AND M.movieTitle = @movieTitle) OR (@movieTitle IS NULL))
+    GROUP BY R.showingID, S.ticketsBought, M.movieTitle, S.[date]
+    ORDER BY S.[date] ASC   
+    RETURN
+END
+GO
 
-
+SELECT * FROM ticketSaleStatisticComparison(NULL, NULL, NULL)
 ----------------------------------------------------------------------------
 -- widok kontaktow do wytworni, dla ktorych mamy filmy bez licencji
 -- dodac ten widok do triggera???
 GO
-CREATE View [contactToStudiosForNewLicenses] AS
+CREATE View [ContactToStudiosForNewLicenses] AS
     SELECT M.movieTitle, S.studioName, S.contactInfo, L.price FROM Licenses L
     JOIN Movies M ON(L.movieID = M.movieID)
     JOIN Studios S ON(S.studioID = L.movieID)
     WHERE GETDATE() >= (SELECT finish FROM Licenses WHERE Licenses.movieID = L.movieID)
 GO
 
-DROP View [contactToStudiosForNewLicenses]
+DROP View [ContactToStudiosForNewLicenses]
 ----------------------------------------------------------------------------
 -- widzowie, ktorzy wyrazili zgode na otrzymywanie newslettera
 -- i podali swojego maila
@@ -1181,7 +1206,7 @@ DROP VIEW [clientsWithNewsletter]
 DROP FUNCTION IF EXISTS dbo.employeeSalary;
 GO
 CREATE FUNCTION employeeSalary (@year INT, @month INT)
-RETURNS @salaries TABLE
+RETURNS @Salaries TABLE
 (
     [name] NVARCHAR(50),
     [surname] NVARCHAR(50),
@@ -1191,7 +1216,7 @@ RETURNS @salaries TABLE
 )
 AS
 BEGIN
-    INSERT INTO @salaries
+    INSERT INTO @Salaries
     SELECT E.name, E.surname, P.post, P.wage, (
             SELECT SUM(DATEDIFF(HOUR, Shifts.[start], Shifts.[end])) 
             FROM Shifts 
