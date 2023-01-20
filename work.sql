@@ -1104,47 +1104,70 @@ END
 ELSE print('This seat has already been reserved!')
 END 
 GO  
+----------------------------------------------------------------------------
+-- funkcja zwracajaca przychody z seansow dla wybranego roku i miesiaca
+DROP FUNCTION IF EXISTS dbo.incomeFromMovies;
+GO
+CREATE FUNCTION incomeFromMovies (@year INT, @month INT)
+RETURNS @IncomeFromMovies TABLE
+(
+    [movieTitle] NVARCHAR(50),
+    [ticketSales] INT,
+    [date] DATE
+)
+AS
+BEGIN
+    INSERT INTO @IncomeFromMovies
+    SELECT M.movieTitle,
+    (SELECT COUNT(*) 
+        FROM Reservations 
+        WHERE showingID = R.showingID AND ticketType = 'R' AND YEAR(S.[date]) = @year AND MONTH(S.[date]) = @month) * S.reducedPrice 
+    +
+    (SELECT COUNT(*) 
+        FROM Reservations 
+        WHERE showingID = R.showingID AND ticketType = 'S' AND YEAR(S.[date]) = @year AND MONTH(S.[date]) = @month) * S.standardPrice 
+        AS [ticket sales],
+        S.[date]
+    FROM Reservations R
+    JOIN Showings S ON(R.showingID = S.showingID)
+    JOIN Movies M ON(S.movieID = M.movieID)
+    GROUP BY M.movieTitle, R.showingID, S.reducedPrice, S.standardPrice, S.[date]
+    RETURN
+END
+GO
 
-------
-SELECT R.showingID,
-(SELECT COUNT(*) FROM Reservations WHERE showingID = R.showingID AND ticketType = 'R') * S.reducedPrice 
-+
-(SELECT COUNT(*) FROM Reservations WHERE showingID = R.showingID AND ticketType = 'S') * S.standardPrice AS [ticket sales],
-S.[date]
-FROM Reservations R
-JOIN Showings S ON(R.showingID = S.showingID)
-GROUP BY R.showingID, S.reducedPrice, S.standardPrice, S.[date]
+SELECT * FROM incomeFromMovies(2022, 1)
+----------------------------------------------------------------------------
+-- procedura generujaca bilans przychodu w wybranym roku i miesiacu
+DROP PROCEDURE IF EXISTS generateMonthlyIncomeBalance;
+GO
+CREATE PROCEDURE generateMonthlyIncomeBalance (@year INT, @month INT)
+AS
+DECLARE @tickets INT, @productIncome INT, @productExpense INT, @salaries INT
+BEGIN
+    SET @tickets = (SELECT SUM(ticketSales) AS Tickets FROM incomeFromMovies(@year, @month))
+    SET @productIncome = (SELECT SUM(income) FROM productsIncome(@year, @month))
+    SET @productExpense = (SELECT SUM(expense) FROM productsExpense(@year, @month))
+    SET @salaries = (SELECT SUM(salary) AS Salaries FROM employeeSalary(@year, @month))
 
--- najczesciej ogladane filmy
-SELECT TOP 3 WITH TIES M.movieTitle, COUNT(R.reservationID) as [total viewers] FROM Reservations R
-JOIN Showings S ON (R.showingID = S.showingID)
-JOIN Movies M ON(M.movieID = S.movieID)
-GROUP BY M.movieTitle ORDER BY COUNT(R.reservationID) DESC
+    SELECT @tickets AS [ticketIncome], @productIncome AS [productIncome], @salaries AS [salaries], @productExpense AS [productExpense], @tickets + @productIncome - @salaries - @productExpense AS [totalBalance] 
+END
+GO
 
--- wydatki z przychodami???
+EXECUTE generateMonthlyIncomeBalance 2022, NULL
+----------------------------------------------------------------------------
+-- widok z klientami, ktorzy widzieli wiecej niz polowe filmow
+GO
+CREATE View [mostLoyalClients] AS
+    SELECT C.name, C.surname, C.email, C.phoneNumber, C.newsletter, COUNT(DISTINCT R.showingID) AS [films watched]
+    FROM Clients C
+    JOIN Reservations R ON(C.clientID = R.clientID)
+    GROUP BY C.name, C.surname, C.email, C.phoneNumber, C.newsletter
+    HAVING COUNT(DISTINCT R.showingID) >= ROUND((SELECT COUNT(*) FROM Showings)/2, 0)
+    ORDER BY [films watched] DESC
+GO
 
--- klienci, ktorzy widzieli wiecej niz polowe filmow
-SELECT C.name, C.surname, C.email, C.phoneNumber, C.newsletter, COUNT(DISTINCT R.showingID) AS [films watched] FROM Clients C
-JOIN Reservations R ON(C.clientID = R.clientID)
-GROUP BY C.name, C.surname, C.email, C.phoneNumber, C.newsletter
-HAVING COUNT(DISTINCT R.showingID) >= ROUND((SELECT COUNT(*) FROM Showings)/2, 0)
-ORDER BY [films watched] DESC
-
--- kasjer, ktory dokonal najwiecej transakcji i kasjer ktory sprzedal najwiecej biletow
-SELECT TOP 1 E.name, E.surname, COUNT(E.employeeID) AS [total number of transactions] FROM TransactionList T
-JOIN Employees E ON(E.employeeID = T.employeeID)
-GROUP BY E.name, E.surname
-UNION
-SELECT TOP 1 E.name, E.surname, COUNT(R.employeeID) FROM Reservations R
-JOIN Employees E ON(E.employeeID = R.employeeID)
-GROUP BY E.name, E.surname
-
-
-
--- widok wyswietlajacy aktualny stan magazynowy 
-SELECT P.name, P.pcsInStock FROM Products P
-GROUP BY P.name, P.pcsInStock ORDER BY P.pcsInStock DESC
-
+DROP View [mostLoyalClients]
 ----------------------------------------------------------------------------
 -- funkcja wyswietlajaca statystyki sprzedazy biletow dla wybranego [roku, miesiaca, filmu]
 -- gdzie poszczegolne argumenty moga przyjmowac wartosc NULL
@@ -1191,6 +1214,17 @@ GO
 
 DROP View [ContactToStudiosForNewLicenses]
 ----------------------------------------------------------------------------
+-- widok filmy w kinie cieszace sie najwieksza popularnoscia
+GO
+CREATE View [MostViewedFilms] AS
+    SELECT TOP 3 WITH TIES M.movieTitle, COUNT(R.reservationID) as [total viewers] FROM Reservations R
+    JOIN Showings S ON (R.showingID = S.showingID)
+    JOIN Movies M ON(M.movieID = S.movieID)
+    GROUP BY M.movieTitle ORDER BY COUNT(R.reservationID) DESC
+GO
+
+DROP View [MostViewedFilms]
+----------------------------------------------------------------------------
 -- widzowie, ktorzy wyrazili zgode na otrzymywanie newslettera
 -- i podali swojego maila
 GO
@@ -1200,7 +1234,6 @@ CREATE View [clientsWithNewsletter] AS
 GO
 
 DROP VIEW [clientsWithNewsletter]
-
 ----------------------------------------------------------------------------
 -- bilans pensji dla pracownikow dla konkretnego miesiąca i roku
 DROP FUNCTION IF EXISTS dbo.employeeSalary;
@@ -1232,5 +1265,50 @@ BEGIN
 END
 GO
 
-SELECT * FROM employeeSalary(20222, 1)
+SELECT * FROM employeeSalary(2022, 1)
 ----------------------------------------------------------------------------
+--funkcja zwracajaca przychody z produktow w danym miesiau 
+DROP FUNCTION IF EXISTS dbo.productsIncome;
+GO 
+CREATE FUNCTION productsIncome ( @year INT,@month INT)
+RETURNS @producttable TABLE
+(
+	[ProductName] VARCHAR(50),
+	Income INT
+)
+AS
+BEGIN
+	INSERT INTO @producttable 
+         SELECT P.name,SUM(P.retailPrice*T.amount)
+         FROM Products P JOIN TransactionList T ON P.productID = T.productID 
+         WHERE ((@month is not null AND MONTH(T.[date]) = @month ) OR @month is null)
+         AND ((@year IS NOT NULL AND YEAR(T.[date]) = @year  ) OR @year is null)
+         GROUP BY P.name
+    RETURN
+END 
+GO  
+
+SELECT * FROM productsIncome(NULL,NULL)
+
+--funkcja zwracajaca wydatki na produkty 
+DROP FUNCTION IF EXISTS dbo.productsExpense;
+GO 
+CREATE FUNCTION productsExpense ( @year INT,@month INT)
+RETURNS @producttable TABLE
+(
+	[ProductName] VARCHAR(50),
+	Expense INT
+)
+AS
+BEGIN
+	INSERT INTO @producttable 
+         SELECT P.name,SUM(O.orderPrice)
+         FROM Products P JOIN Orders O ON P.productID = O.productID 
+         WHERE ((@month is not null AND MONTH(O.orderDate) = @month ) OR @month is null)
+         AND ((@year IS NOT NULL AND YEAR(O.orderDate) = @year  ) OR @year is null)
+         GROUP BY P.name
+    RETURN
+END 
+GO  
+
+SELECT * FROM productsExpense(NULL,NULL)  
