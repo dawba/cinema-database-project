@@ -2,22 +2,26 @@
 -- stored procedure generating income/expense balance
 -- arguments of the procedure are not mandatory value-vise (NULL is accepted)
 -- passed format is [YY, MM] e.g. [2022, 1] or [2022, NULL]
-DROP PROCEDURE IF EXISTS generateMonthlyIncomeBalance;
+DROP PROCEDURE IF EXISTS generateIncomeBalance;
 GO
-CREATE PROCEDURE generateMonthlyIncomeBalance (@year INT, @month INT)
+CREATE PROCEDURE generateIncomeBalance (@year INT, @month INT, @day INT)
 AS
 DECLARE @tickets INT, @productIncome INT, @productExpense INT, @salaries INT
 BEGIN
-    SET @tickets = (SELECT SUM(ticketSales) AS Tickets FROM incomeFromMovies(@year, @month))
-    SET @productIncome = (SELECT SUM(income) FROM productsIncome(@year, @month))
-    SET @productExpense = (SELECT SUM(expense) FROM productsExpense(@year, @month))
-    SET @salaries = (SELECT SUM(salary) AS Salaries FROM employeeSalary(@year, @month))
+    SET @tickets = (SELECT SUM(ticketSales) AS Tickets FROM incomeFromMovies(@year, @month, @day))
+    SET @tickets = ISNULL(@tickets, 0)
+    SET @productIncome = (SELECT SUM(income) FROM productsIncome(@year, @month, @day))
+    SET @productIncome = ISNULL(@productIncome, 0)
+    SET @productExpense = (SELECT SUM(expense) FROM productsExpense(@year, @month, @day))
+    SET @productExpense = ISNULL(@productExpense, 0)
+    SET @salaries = (SELECT SUM(salary) AS Salaries FROM employeeSalary(@year, @month, @day))
+    SET @salaries = ISNULL(@salaries, 0)
 
     SELECT @tickets AS [ticketIncome], @productIncome AS [productIncome], @salaries AS [salaries], @productExpense AS [productExpense], @tickets + @productIncome - @salaries - @productExpense AS [totalBalance] 
 END
 GO
 
-EXECUTE generateMonthlyIncomeBalance 2022, NULL
+EXECUTE generateIncomeBalance 2022, 1, 23
 ----------------------------------------------------------------------------
 -- stored procedure displaying available seats for selected showing
 -- arguments of the procedure are mandatory value-vise (NULL is not accepted)

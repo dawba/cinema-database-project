@@ -1,12 +1,12 @@
 ----------------------------------------------------------------------------
 -- view displaying viewers who agreed to receive the newsletter
 GO
-CREATE View [clientsWithNewsletter] AS
+CREATE View [ClientsWithNewsletter] AS
     SELECT * FROM Clients C
     WHERE C.newsletter = 1
 GO
 
-DROP VIEW [clientsWithNewsletter]
+DROP VIEW [ClientsWithNewsletter]
 ----------------------------------------------------------------------------
 -- view displaying most watched movies in our cinema
 GO
@@ -32,13 +32,12 @@ DROP View [ContactToStudiosForNewLicenses]
 ----------------------------------------------------------------------------
 -- view displaying viewers who have watched more than half of our showings
 GO
-CREATE View [mostLoyalClients] AS
+CREATE View [MostLoyalClients] AS
     SELECT C.name, C.surname, C.email, C.phoneNumber, C.newsletter, COUNT(DISTINCT R.showingID) AS [films watched]
     FROM Clients C
     JOIN Reservations R ON(C.clientID = R.clientID)
     GROUP BY C.name, C.surname, C.email, C.phoneNumber, C.newsletter
     HAVING COUNT(DISTINCT R.showingID) >= ROUND((SELECT COUNT(*) FROM Showings)/2, 0)
-    ORDER BY [films watched] DESC
 GO
 
-DROP View [mostLoyalClients]
+DROP View [MostLoyalClients]
