@@ -453,3 +453,339 @@ GO
 EXECUTE daysOff 2022, 1
 ----------------------------------------------------------------------------
 ```
+
+## Wyzwalacze
+Przygotowane wyzwalacze są związane z aktualizowaniem i dodawaniem danych związanych z transakcjami/rezerwacją miejsc czy seansami.
+
+```sql
+----------------------------------------------------------------------------
+--1 trigger for checking if movie we attempt to add to current showing list has valid license
+IF OBJECT_ID ('LicenseCheck', 'TR') IS NOT NULL  
+   DROP TRIGGER LicenseCheck;  
+GO
+CREATE TRIGGER LicenseCheck
+ON Showings
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF
+    ( (SELECT finish FROM Licenses L JOIN INSERTED I  ON L.movieID = I.movieID ) > (SELECT [date] from inserted))
+      INSERT INTO Showings  
+      (hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought) 
+      SELECT hallID,movieID,[date],standardPrice,reducedPrice,ticketsBought FROM INSERTED
+     ELSE 
+     PRINT('License for this movie has expired! Studio contact info:')
+     SELECT S.contactInfo FROM Studios S JOIN Licenses L ON L.studioID = S.studioID 
+     WHERE L.movieID = (SELECT I.movieID FROM inserted I)
+END
+GO
+----------------------------------------------------------------------------
+```
+
+```sql
+----------------------------------------------------------------------------
+--2 trigger reducing current product stock availability after transaction
+ IF OBJECT_ID ('ProductSold', 'TR') IS NOT NULL  
+   DROP TRIGGER ProductSold;  
+GO
+CREATE TRIGGER ProductSold
+ON TransactionList
+AFTER INSERT 
+AS 
+BEGIN
+    UPDATE Products 
+    SET pcsInStock = (pcsInStock - (SELECT amount FROM inserted)) 
+    WHERE Products.productID = (SELECT productID from inserted)
+END 
+GO
+----------------------------------------------------------------------------
+```
+
+```sql
+----------------------------------------------------------------------------
+--3 trigger increasing current product stock availability after ordering restockment
+ IF OBJECT_ID ('ProductOrdered', 'TR') IS NOT NULL  
+   DROP TRIGGER ProductOrdered;  
+GO
+CREATE TRIGGER ProductOrdered
+ON Orders
+AFTER INSERT 
+AS 
+BEGIN
+    UPDATE Products 
+    SET pcsInStock = (pcsInStock + (SELECT quantity FROM inserted)) 
+    WHERE Products.productID = (SELECT productID from inserted)
+END 
+GO 
+----------------------------------------------------------------------------
+```
+
+```sql
+----------------------------------------------------------------------------
+--4 trigger increasing tickets sold count and checking for seat availability
+IF OBJECT_ID ('TicketSold', 'TR') IS NOT NULL  
+   DROP TRIGGER TicketSold;  
+GO
+CREATE TRIGGER TicketSold
+ON Reservations
+INSTEAD OF INSERT 
+AS 
+BEGIN
+    IF NOT EXISTS(SELECT * FROM Reservations R 
+                           JOIN inserted ON R.showingID = inserted.showingID 
+                           WHERE R.seatID = inserted.seatID )
+BEGIN
+UPDATE Showings 
+    SET ticketsBought = (ticketsBought + 1) 
+    WHERE Showings.showingID = (SELECT showingID FROM inserted) 
+INSERT INTO Reservations(showingID, ticketType, seatID, employeeID, sold, clientID) 
+    SELECT showingID, ticketType, seatID, employeeID, sold, clientID FROM inserted 
+END
+ELSE print('This seat has already been reserved!')
+END 
+GO 
+----------------------------------------------------------------------------
+```
+
+```sql
+----------------------------------------------------------------------------
+--5 trigger for returning tickets as long as request was made at least 30 minutes before show
+IF OBJECT_ID ('TicketReturn', 'TR') IS NOT NULL  
+   DROP TRIGGER TicketReturn;  
+GO
+CREATE TRIGGER TicketReturn
+ON Reservations
+INSTEAD OF DELETE 
+AS 
+BEGIN
+    IF DATEDIFF(minute, GETDATE(), (SELECT [date] FROM Showings S 
+                                                  JOIN deleted ON deleted.showingID = S.showingID)) >= 30 
+BEGIN
+    DELETE FROM Reservations WHERE reservationID IN (SELECT reservationID FROM deleted)  
+UPDATE Showings 
+    SET ticketsBought = (ticketsBought-1) 
+    WHERE Showings.showingID = (SELECT showingID FROM deleted) 
+END 
+ELSE PRINT('You cannot return a ticket less than 30 minutes before the show, sorry')
+END 
+GO
+----------------------------------------------------------------------------
+```
+
+## Skrypt tworzący bazę danych
+
+```sql
+IF OBJECT_ID('Cinema', 'U') IS NOT NULL
+    DROP DATABASE Cinema
+CREATE DATABASE Cinema
+GO
+USE Cinema
+
+CREATE TABLE [dbo].[Movies]
+(
+    [movieID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [movieTitle] VARCHAR(100) NOT NULL,
+    [genre] VARCHAR(100) NOT NULL,
+    [releaseYear] INT NOT NULL,
+    [director] VARCHAR(100) NOT NULL,
+    [length] INT NOT NULL,
+    [country] VARCHAR(100) NOT NULL,
+    [onDisplay] VARCHAR(3) NOT NULL
+)
+
+CREATE TABLE [dbo].[Actors]
+(
+    [actorID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [actorName] VARCHAR(100) NOT NULL,
+    [actorSurname] VARCHAR(100) NOT NULL,
+    [yearOfBirth] INT NOT NULL,
+    [gender] VARCHAR(1) NOT NULL,
+    [country] VARCHAR(100) NOT NULL,
+)
+
+CREATE TABLE [dbo].[Cast]
+(
+    [movieID] INT,
+    [actorID] INT,
+    [role] VARCHAR(100) NOT NULL
+) 
+
+CREATE TABLE [dbo].[Clients]
+(
+    [clientID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [name] NVARCHAR(100) NOT NULL,
+    [surname] NVARCHAR(100) NOT NULL,
+    [email] VARCHAR(100),
+    [phoneNumber] VARCHAR(9),
+    [newsletter] BIT
+)
+
+CREATE TABLE [dbo].[Reservations]
+(
+    [reservationID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [showingID] INT NOT NULL,
+    [ticketType] VARCHAR(100) NOT NULL,
+    [seatID] INT NOT NULL,
+    [employeeID] INT,
+    [sold] DATE NOT NULL,
+    [clientID] INT NOT NULL
+) 
+
+CREATE TABLE [dbo].[Seats]
+(
+    [seatID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [hallID] INT NOT NULL,
+    [row] INT NOT NULL,
+    [seatNumber] INT NOT NULL
+) 
+
+CREATE TABLE [dbo].[Employees]
+(
+    [employeeID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [name] NVARCHAR(100) NOT NULL,
+    [surname] NVARCHAR(100) NOT NULL,
+    [sex] VARCHAR(1) NOT NULL,
+    [dateOfBirth] DATE NOT NULL,
+    [postID] INT NOT NULL
+)
+
+CREATE TABLE [dbo].[Shifts]
+(
+    [employeeID] INT NOT NULL ,
+    [start] DATETIME NOT NULL,
+    [end] DATETIME NOT NULL,
+) 
+
+CREATE TABLE [dbo].[Posts]
+(
+    [postID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [post] VARCHAR(100) NOT NULL,
+    [wage] INT NOT NULL,
+)
+
+CREATE TABLE [dbo].[Showings]
+(
+    [showingID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [hallID] INT NOT NULL,
+    [movieID] INT NOT NULL,
+    [date] DATETIME NOT NULL,
+    [standardPrice] INT NOT NULL,
+    [reducedPrice] INT NOT NULL,
+    [ticketsBought] INT NOT NULL
+) 
+
+CREATE TABLE [dbo].[TransactionList]
+(
+    [transactionID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
+    [employeeID] INT NOT NULL,
+    [date] DATE NOT NULL,
+    [amount] INT NOT NULL,
+    [productID] INT NOT NULL
+) 
+
+CREATE TABLE [dbo].[Products]
+(
+    [productID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY ,
+    [name] VARCHAR(100) NOT NULL,
+    [retailPrice] INT NOT NULL,
+    [wholesalePrice] INT NOT NULL,
+    [pcsInStock] INT NOT NULL
+)
+
+CREATE TABLE [dbo].[Studios]
+(
+    [studioID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [studioName] VARCHAR(100) NOT NULL,
+    [contactInfo] VARCHAR(100) NOT NULL
+)
+
+CREATE TABLE [dbo].[Licenses]
+(
+    [studioID] INT NOT NULL ,
+    [movieID] INT NOT NULL ,
+    [start] DATE NOT NULL,
+    [finish] DATE NOT NULL,
+    [price] INT NOT NULL
+) 
+
+CREATE TABLE [dbo].[Orders]
+(
+    [orderID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
+    [productID] INT NOT NULL,
+    [quantity] INT NOT NULL,
+    [orderPrice] INT NOT NULL,
+    [orderDate] DATE NOT NULL,
+    [status] VARCHAR(20) NOT NULL
+) 
+
+CREATE TABLE [dbo].[Halls]
+(
+    [hallID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [colour] VARCHAR(100) NOT NULL,
+    [capacity] INT NOT NULL
+) 
+
+ALTER TABLE Cast 
+ADD CONSTRAINT [moviePlayed] 
+FOREIGN KEY (movieID) REFERENCES Movies(movieID) 
+
+ALTER TABLE Cast 
+ADD CONSTRAINT [actorPlayed] 
+FOREIGN KEY (actorID) REFERENCES Actors(actorID) 
+
+ALTER TABLE Reservations 
+ADD CONSTRAINT [showing] 
+FOREIGN KEY (showingID) REFERENCES Showings(showingID) 
+
+ALTER TABLE Reservations 
+ADD CONSTRAINT [seat]  
+FOREIGN KEY (seatID) REFERENCES Seats(seatID) 
+
+ALTER TABLE Reservations 
+ADD CONSTRAINT [rEmployee] 
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID)  
+
+ALTER TABLE Reservations 
+ADD CONSTRAINT [client] 
+FOREIGN KEY (clientID) REFERENCES Clients(clientID)  
+
+ALTER TABLE Seats
+ADD CONSTRAINT [hall] 
+FOREIGN KEY (hallID) REFERENCES Halls(hallID) 
+
+ALTER TABLE Employees
+ADD CONSTRAINT [post] 
+FOREIGN KEY (postID) REFERENCES Posts(postID) 
+
+ALTER TABLE Shifts
+ADD CONSTRAINT [sEmployee] 
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID)
+
+ALTER TABLE Showings
+ADD CONSTRAINT [showingHall] 
+FOREIGN KEY (hallID) REFERENCES Halls(hallID) 
+
+ALTER TABLE Showings
+ADD CONSTRAINT [showingMovie] 
+FOREIGN KEY (movieID) REFERENCES Movies(movieID)
+
+ALTER TABLE TransactionList
+ADD CONSTRAINT [transactionEmployee] 
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID) 
+
+ALTER TABLE TransactionList
+ADD CONSTRAINT [transProduct] 
+FOREIGN KEY (productID) REFERENCES Products(productID) 
+
+ALTER TABLE Licenses
+ADD CONSTRAINT [lStudio] 
+FOREIGN KEY (studioID) REFERENCES Studios(studioID) 
+
+ALTER TABLE Licenses
+ADD CONSTRAINT [lMovie] 
+FOREIGN KEY (movieID) REFERENCES Movies(movieID) 
+
+ALTER TABLE Orders
+ADD CONSTRAINT [orderedProduct] 
+FOREIGN KEY (productID) REFERENCES Products(productID)
+```
