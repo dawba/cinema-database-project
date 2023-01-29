@@ -591,7 +591,7 @@ CREATE TABLE [dbo].[Movies]
     [length] INT NOT NULL,
     [country] VARCHAR(100) NOT NULL,
     [onDisplay] VARCHAR(3) NOT NULL
-)
+);
 
 CREATE TABLE [dbo].[Actors]
 (
@@ -601,14 +601,14 @@ CREATE TABLE [dbo].[Actors]
     [yearOfBirth] INT NOT NULL,
     [gender] VARCHAR(1) NOT NULL,
     [country] VARCHAR(100) NOT NULL,
-)
+);
 
 CREATE TABLE [dbo].[Cast]
 (
     [movieID] INT,
     [actorID] INT,
     [role] VARCHAR(100) NOT NULL
-) 
+);
 
 CREATE TABLE [dbo].[Clients]
 (
@@ -618,7 +618,7 @@ CREATE TABLE [dbo].[Clients]
     [email] VARCHAR(100),
     [phoneNumber] VARCHAR(9),
     [newsletter] BIT
-)
+);
 
 CREATE TABLE [dbo].[Reservations]
 (
@@ -629,7 +629,7 @@ CREATE TABLE [dbo].[Reservations]
     [employeeID] INT,
     [sold] DATE NOT NULL,
     [clientID] INT NOT NULL
-) 
+);
 
 CREATE TABLE [dbo].[Seats]
 (
@@ -637,7 +637,7 @@ CREATE TABLE [dbo].[Seats]
     [hallID] INT NOT NULL,
     [row] INT NOT NULL,
     [seatNumber] INT NOT NULL
-) 
+); 
 
 CREATE TABLE [dbo].[Employees]
 (
@@ -647,21 +647,21 @@ CREATE TABLE [dbo].[Employees]
     [sex] VARCHAR(1) NOT NULL,
     [dateOfBirth] DATE NOT NULL,
     [postID] INT NOT NULL
-)
+);
 
 CREATE TABLE [dbo].[Shifts]
 (
     [employeeID] INT NOT NULL ,
     [start] DATETIME NOT NULL,
     [end] DATETIME NOT NULL,
-) 
+);
 
 CREATE TABLE [dbo].[Posts]
 (
     [postID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [post] VARCHAR(100) NOT NULL,
     [wage] INT NOT NULL,
-)
+);
 
 CREATE TABLE [dbo].[Showings]
 (
@@ -672,7 +672,7 @@ CREATE TABLE [dbo].[Showings]
     [standardPrice] INT NOT NULL,
     [reducedPrice] INT NOT NULL,
     [ticketsBought] INT NOT NULL
-) 
+);
 
 CREATE TABLE [dbo].[TransactionList]
 (
@@ -681,7 +681,7 @@ CREATE TABLE [dbo].[TransactionList]
     [date] DATE NOT NULL,
     [amount] INT NOT NULL,
     [productID] INT NOT NULL
-) 
+); 
 
 CREATE TABLE [dbo].[Products]
 (
@@ -690,14 +690,14 @@ CREATE TABLE [dbo].[Products]
     [retailPrice] INT NOT NULL,
     [wholesalePrice] INT NOT NULL,
     [pcsInStock] INT NOT NULL
-)
+);
 
 CREATE TABLE [dbo].[Studios]
 (
     [studioID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [studioName] VARCHAR(100) NOT NULL,
     [contactInfo] VARCHAR(100) NOT NULL
-)
+);
 
 CREATE TABLE [dbo].[Licenses]
 (
@@ -706,7 +706,7 @@ CREATE TABLE [dbo].[Licenses]
     [start] DATE NOT NULL,
     [finish] DATE NOT NULL,
     [price] INT NOT NULL
-) 
+);
 
 CREATE TABLE [dbo].[Orders]
 (
@@ -716,76 +716,76 @@ CREATE TABLE [dbo].[Orders]
     [orderPrice] INT NOT NULL,
     [orderDate] DATE NOT NULL,
     [status] VARCHAR(20) NOT NULL
-) 
+); 
 
 CREATE TABLE [dbo].[Halls]
 (
     [hallID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [colour] VARCHAR(100) NOT NULL,
     [capacity] INT NOT NULL
-) 
+); 
 
 ALTER TABLE Cast 
 ADD CONSTRAINT [moviePlayed] 
-FOREIGN KEY (movieID) REFERENCES Movies(movieID) 
+FOREIGN KEY (movieID) REFERENCES Movies(movieID);
 
 ALTER TABLE Cast 
 ADD CONSTRAINT [actorPlayed] 
-FOREIGN KEY (actorID) REFERENCES Actors(actorID) 
+FOREIGN KEY (actorID) REFERENCES Actors(actorID);
 
 ALTER TABLE Reservations 
 ADD CONSTRAINT [showing] 
-FOREIGN KEY (showingID) REFERENCES Showings(showingID) 
+FOREIGN KEY (showingID) REFERENCES Showings(showingID);
 
 ALTER TABLE Reservations 
 ADD CONSTRAINT [seat]  
-FOREIGN KEY (seatID) REFERENCES Seats(seatID) 
+FOREIGN KEY (seatID) REFERENCES Seats(seatID);
 
 ALTER TABLE Reservations 
 ADD CONSTRAINT [rEmployee] 
-FOREIGN KEY (employeeID) REFERENCES Employees(employeeID)  
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID);
 
 ALTER TABLE Reservations 
 ADD CONSTRAINT [client] 
-FOREIGN KEY (clientID) REFERENCES Clients(clientID)  
+FOREIGN KEY (clientID) REFERENCES Clients(clientID);
 
 ALTER TABLE Seats
 ADD CONSTRAINT [hall] 
-FOREIGN KEY (hallID) REFERENCES Halls(hallID) 
+FOREIGN KEY (hallID) REFERENCES Halls(hallID);
 
 ALTER TABLE Employees
 ADD CONSTRAINT [post] 
-FOREIGN KEY (postID) REFERENCES Posts(postID) 
+FOREIGN KEY (postID) REFERENCES Posts(postID);
 
 ALTER TABLE Shifts
 ADD CONSTRAINT [sEmployee] 
-FOREIGN KEY (employeeID) REFERENCES Employees(employeeID)
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID);
 
 ALTER TABLE Showings
 ADD CONSTRAINT [showingHall] 
-FOREIGN KEY (hallID) REFERENCES Halls(hallID) 
+FOREIGN KEY (hallID) REFERENCES Halls(hallID);
 
 ALTER TABLE Showings
 ADD CONSTRAINT [showingMovie] 
-FOREIGN KEY (movieID) REFERENCES Movies(movieID)
+FOREIGN KEY (movieID) REFERENCES Movies(movieID);
 
 ALTER TABLE TransactionList
 ADD CONSTRAINT [transactionEmployee] 
-FOREIGN KEY (employeeID) REFERENCES Employees(employeeID) 
+FOREIGN KEY (employeeID) REFERENCES Employees(employeeID);
 
 ALTER TABLE TransactionList
 ADD CONSTRAINT [transProduct] 
-FOREIGN KEY (productID) REFERENCES Products(productID) 
+FOREIGN KEY (productID) REFERENCES Products(productID);
 
 ALTER TABLE Licenses
 ADD CONSTRAINT [lStudio] 
-FOREIGN KEY (studioID) REFERENCES Studios(studioID) 
+FOREIGN KEY (studioID) REFERENCES Studios(studioID);
 
 ALTER TABLE Licenses
 ADD CONSTRAINT [lMovie] 
-FOREIGN KEY (movieID) REFERENCES Movies(movieID) 
+FOREIGN KEY (movieID) REFERENCES Movies(movieID);
 
 ALTER TABLE Orders
 ADD CONSTRAINT [orderedProduct] 
-FOREIGN KEY (productID) REFERENCES Products(productID)
+FOREIGN KEY (productID) REFERENCES Products(productID);
 ```
