@@ -581,7 +581,7 @@ CREATE DATABASE Cinema
 GO
 USE Cinema
 
-CREATE TABLE [dbo].[Movies]
+CREATE TABLE Movies
 (
     [movieID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [movieTitle] VARCHAR(100) NOT NULL,
@@ -593,7 +593,7 @@ CREATE TABLE [dbo].[Movies]
     [onDisplay] VARCHAR(3) NOT NULL
 );
 
-CREATE TABLE [dbo].[Actors]
+CREATE TABLE Actors
 (
     [actorID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [actorName] VARCHAR(100) NOT NULL,
@@ -603,14 +603,14 @@ CREATE TABLE [dbo].[Actors]
     [country] VARCHAR(100) NOT NULL,
 );
 
-CREATE TABLE [dbo].[Cast]
+CREATE TABLE Cast
 (
     [movieID] INT,
     [actorID] INT,
     [role] VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE [dbo].[Clients]
+CREATE TABLE Clients
 (
     [clientID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [name] NVARCHAR(100) NOT NULL,
@@ -620,7 +620,7 @@ CREATE TABLE [dbo].[Clients]
     [newsletter] BIT
 );
 
-CREATE TABLE [dbo].[Reservations]
+CREATE TABLE Reservations
 (
     [reservationID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [showingID] INT NOT NULL,
@@ -631,7 +631,7 @@ CREATE TABLE [dbo].[Reservations]
     [clientID] INT NOT NULL
 );
 
-CREATE TABLE [dbo].[Seats]
+CREATE TABLE Seats
 (
     [seatID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [hallID] INT NOT NULL,
@@ -639,7 +639,7 @@ CREATE TABLE [dbo].[Seats]
     [seatNumber] INT NOT NULL
 ); 
 
-CREATE TABLE [dbo].[Employees]
+CREATE TABLE Employees
 (
     [employeeID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [name] NVARCHAR(100) NOT NULL,
@@ -649,21 +649,21 @@ CREATE TABLE [dbo].[Employees]
     [postID] INT NOT NULL
 );
 
-CREATE TABLE [dbo].[Shifts]
+CREATE TABLE Shifts
 (
     [employeeID] INT NOT NULL ,
     [start] DATETIME NOT NULL,
     [end] DATETIME NOT NULL,
 );
 
-CREATE TABLE [dbo].[Posts]
+CREATE TABLE Posts
 (
     [postID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [post] VARCHAR(100) NOT NULL,
     [wage] INT NOT NULL,
 );
 
-CREATE TABLE [dbo].[Showings]
+CREATE TABLE Showings
 (
     [showingID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [hallID] INT NOT NULL,
@@ -674,7 +674,7 @@ CREATE TABLE [dbo].[Showings]
     [ticketsBought] INT NOT NULL
 );
 
-CREATE TABLE [dbo].[TransactionList]
+CREATE TABLE TransactionList
 (
     [transactionID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
     [employeeID] INT NOT NULL,
@@ -683,7 +683,7 @@ CREATE TABLE [dbo].[TransactionList]
     [productID] INT NOT NULL
 ); 
 
-CREATE TABLE [dbo].[Products]
+CREATE TABLE Products
 (
     [productID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY ,
     [name] VARCHAR(100) NOT NULL,
@@ -692,14 +692,14 @@ CREATE TABLE [dbo].[Products]
     [pcsInStock] INT NOT NULL
 );
 
-CREATE TABLE [dbo].[Studios]
+CREATE TABLE Studios
 (
     [studioID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [studioName] VARCHAR(100) NOT NULL,
     [contactInfo] VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE [dbo].[Licenses]
+CREATE TABLE Licenses
 (
     [studioID] INT NOT NULL ,
     [movieID] INT NOT NULL ,
@@ -708,7 +708,7 @@ CREATE TABLE [dbo].[Licenses]
     [price] INT NOT NULL
 );
 
-CREATE TABLE [dbo].[Orders]
+CREATE TABLE Orders
 (
     [orderID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
     [productID] INT NOT NULL,
@@ -718,7 +718,7 @@ CREATE TABLE [dbo].[Orders]
     [status] VARCHAR(20) NOT NULL
 ); 
 
-CREATE TABLE [dbo].[Halls]
+CREATE TABLE Halls
 (
     [hallID] INT NOT NULL IDENTITY (1, 1) PRIMARY KEY,
     [colour] VARCHAR(100) NOT NULL,
