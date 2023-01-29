@@ -105,6 +105,7 @@ IF OBJECT_ID(N'dbo.TransactionList', N'U') IS NOT NULL DROP TABLE [dbo].[Transac
 GO
 CREATE TABLE [dbo].[TransactionList]
 (
+    [transactionID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY
     [employeeID] INT NOT NULL,
     [date] DATE NOT NULL,
     [amount] INT NOT NULL,
@@ -142,6 +143,7 @@ IF OBJECT_ID(N'dbo.Orders', N'U') IS NOT NULL DROP TABLE [dbo].[Orders];
 GO
 CREATE TABLE [dbo].[Orders]
 (
+    [orderID] INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
     [productID] INT NOT NULL,
     [quantity] INT NOT NULL,
     [orderPrice] INT NOT NULL,
