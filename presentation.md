@@ -264,7 +264,7 @@ BEGIN
          FROM Products P JOIN TransactionList T ON P.productID = T.productID 
          WHERE ((@year IS NOT NULL AND YEAR(T.[date]) = @year  ) OR @year IS NULL)
          AND ((@month IS NOT NULL AND MONTH(T.[date]) = @month ) OR @month IS NULL)
-         AND ((@day IS NOT NULL AND MONTH(T.[date]) = @day ) OR @day IS NULL)
+         AND ((@day IS NOT NULL AND DAY(T.[date]) = @day ) OR @day IS NULL)
          GROUP BY P.name
     RETURN
 END 
