@@ -131,13 +131,13 @@ BEGIN
          FROM Products P JOIN TransactionList T ON P.productID = T.productID 
          WHERE ((@year IS NOT NULL AND YEAR(T.[date]) = @year  ) OR @year IS NULL)
          AND ((@month IS NOT NULL AND MONTH(T.[date]) = @month ) OR @month IS NULL)
-         AND ((@day IS NOT NULL AND MONTH(T.[date]) = @day ) OR @day IS NULL)
+         AND ((@day IS NOT NULL AND DAY(T.[date]) = @day ) OR @day IS NULL)
          GROUP BY P.name
     RETURN
 END 
 GO  
 
-SELECT * FROM productsIncome(2022, 1, 6)
+SELECT * FROM productsIncome(2022, 1, 1)
 ----------------------------------------------------------------------------
 -- function calculating expenses for ordered products
 -- arguments of the function are not mandatory value-vise (NULL is accepted)
@@ -167,7 +167,7 @@ SELECT * FROM productsExpense(NULL, NULL, NULL)
 ----------------------------------------------------------------------------
 -- function displaying cinemas repertoire for selected time span
 -- arguments of the function are mandatory value-vise
--- passed format is [YY-MM-DD, YY-MM-DD] e.g. [2022-01-01, 2022-03-04]
+-- passed format is [YY-MM-DD, YY-MM-DD] e.g. ['2022-01-01', '2022-03-04']
 DROP FUNCTION IF EXISTS dbo.cinemaRepertoire;
 GO 
 CREATE FUNCTION cinemaRepertoire (@start DATE, @finish DATE)
@@ -188,4 +188,6 @@ BEGIN
 	RETURN
 END 
 GO 
+
+SELECT * FROM cinemaRepertoire('2022-01-01', '2022-03-04')
 ----------------------------------------------------------------------------

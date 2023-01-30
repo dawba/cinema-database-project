@@ -158,6 +158,8 @@ SELECT * FROM incomeFromMovies(NULL, 1, 30)
 ----------------------------------------------------------------------------
 ```
 
+![images/fun1.png](images/fun1.png)
+
 ```sql
 ----------------------------------------------------------------------------
 --2 function displaying ticket sale statistics for online and on-site sales
@@ -195,6 +197,8 @@ GO
 SELECT * FROM ticketSaleStatisticComparison(2022, 01, 24, NULL)
 ----------------------------------------------------------------------------
 ```
+
+![images/fun2.png](images/fun2.png)
 
 ```sql
 ----------------------------------------------------------------------------
@@ -238,6 +242,8 @@ SELECT * FROM employeeSalary(2022, NULL, NULL)
 ----------------------------------------------------------------------------
 ```
 
+![images/fun3.png](images/fun3.png)
+
 ```sql
 ----------------------------------------------------------------------------
 --4 function calculating revenue from product sales
@@ -267,6 +273,8 @@ GO
 SELECT * FROM productsIncome(2022, 1, 6)
 ----------------------------------------------------------------------------
 ```
+
+![images/fun4.png](images/fun4.png)
 
 ```sql
 ----------------------------------------------------------------------------
@@ -298,6 +306,8 @@ SELECT * FROM productsExpense(NULL, NULL, NULL)
 ----------------------------------------------------------------------------
 ```
 
+![images/fun5.png](images/fun5.png)
+
 ```sql
 ----------------------------------------------------------------------------
 --6 function displaying cinemas repertoire for selected time span
@@ -327,6 +337,8 @@ GO
 SELECT * FROM cinemaRepertoire(2022-01-01, 2022-01-10)
 ----------------------------------------------------------------------------
 ```
+
+![images/fun6.png](images/fun6.png)
 
 ## Procedury składowane
 Zaprojektowane procedury składowane służą m.in do generowania całościowego bilansu przychodów i wydatków czy przychodów z konkretnego filmu,
@@ -359,6 +371,8 @@ GO
 EXECUTE generateIncomeBalance 2022, 1, 23
 ----------------------------------------------------------------------------
 ```
+
+![images/proc1.png](images/proc1.png)
 
 ```sql
 ----------------------------------------------------------------------------
@@ -414,6 +428,8 @@ EXECUTE freeSeats 1
 ----------------------------------------------------------------------------
 ```
 
+![images/proc2.png](images/proc2.png)
+
 ```sql
 ----------------------------------------------------------------------------
 -- stored procedure displaying total movie income and sold tickets for selected movie
@@ -431,9 +447,11 @@ WHERE S.movieID = @movieID
 GROUP BY S.movieID,S.standardPrice,S.reducedPrice  
 GO
 
-EXECUTE movieIncome 'Django Unchained'
+EXECUTE movieIncome 'Godfather'
 ----------------------------------------------------------------------------
 ```
+
+![images/proc3.png](images/proc3.png)
 
 ```sql
 ----------------------------------------------------------------------------
@@ -461,6 +479,8 @@ GO
 EXECUTE daysOff 2022, 1
 ----------------------------------------------------------------------------
 ```
+
+![images/proc4.png](images/proc4.png)
 
 ## Wyzwalacze
 Przygotowane wyzwalacze są związane z aktualizowaniem i dodawaniem danych związanych z transakcjami/rezerwacją miejsc czy seansami.
@@ -1003,12 +1023,12 @@ VALUES
     (1, 2, '2022-01-11', 18, 16, 7),
     (1, 3, '2022-01-12', 18, 16, 10),
     (1, 4, '2022-01-13', 18, 16, 8),
-    (2, 1, '2022-01-14', 18, 16, 26),
+    (2, 1, '2022-01-14', 18, 16, 20),
     (2, 11, '2022-01-15', 18, 16, 8),
     (2, 12, '2022-01-16', 18, 16, 14),
     (2, 13, '2022-01-17', 18, 16, 12),
     (2, 15, '2022-01-18', 18, 16, 13),
-    (3, 14, '2022-01-19', 18, 16,22),
+    (3, 14, '2022-01-19', 18, 16, 22),
     (3, 16, '2022-01-20', 18, 16, 30),
     (3, 17, '2022-01-21', 18, 16, 30),
     (3, 18, '2022-01-22', 18, 16, 30),
@@ -1109,11 +1129,6 @@ VALUES (1, 'S', 1, 1, N'2022-01-03', 1),
        (11, 'R', 5, 3, N'2022-01-13', 6),
        (11, 'S', 6, 1, N'2022-01-13', 7),
        (11, 'S', 7, NULL, N'2022-01-13', 11),
-       (11, 'S', 8, 3, N'2022-01-13', 14),
-       (11, 'R', 9, NULL, N'2022-01-13', 15),
-       (11, 'R', 10, NULL, N'2022-01-13', 18),
-       (11, 'S', 11, NULL, N'2022-01-13', 18),
-       (11, 'S', 12, 2, N'2022-01-13', 18),
        (12, 'S', 1, NULL, N'2022-01-14', 1),
        (12, 'S', 2, 2, N'2022-01-14', 5),
        (12, 'S', 3, 1, N'2022-01-14', 8),

@@ -21,7 +21,7 @@ BEGIN
 END
 GO
 
-EXECUTE generateIncomeBalance 2022, 1, 23
+EXECUTE generateIncomeBalance 2022, 1, NULL
 ----------------------------------------------------------------------------
 -- stored procedure displaying available seats for selected showing
 -- arguments of the procedure are mandatory value-vise (NULL is not accepted)
@@ -88,7 +88,7 @@ WHERE S.movieID = @movieID
 GROUP BY S.movieID,S.standardPrice,S.reducedPrice  
 GO
 
-EXECUTE movieIncome 'Django Unchained'
+EXECUTE movieIncome 'Godfather'
 ----------------------------------------------------------------------------
 -- stored procedure displaying number of days-off each employee had
 -- arguments of the procedure are mandatory value-vise (NULL is not accepted)
