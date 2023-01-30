@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
 -- stored procedure generating income/expense balance
--- arguments of the procedure are not mandatory value-vise (NULL is accepted)
+-- arguments of the procedure are not mandatory value-wise (NULL is accepted)
 -- passed format is [YY, MM] e.g. [2022, 1] or [2022, NULL]
 DROP PROCEDURE IF EXISTS generateIncomeBalance;
 GO
@@ -24,7 +24,7 @@ GO
 EXECUTE generateIncomeBalance 2022, 1, NULL
 ----------------------------------------------------------------------------
 -- stored procedure displaying available seats for selected showing
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [number] e.g. [23]
 DROP PROCEDURE IF EXISTS freeSeats;  
 GO  
@@ -74,7 +74,7 @@ GO
 EXECUTE freeSeats 1
 ----------------------------------------------------------------------------
 -- stored procedure displaying total movie income and sold tickets for selected movie
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [movie title] e.g. ['Django Unchained']
 DROP PROCEDURE IF EXISTS movieIncome;  
 GO  
@@ -91,7 +91,7 @@ GO
 EXECUTE movieIncome 'Godfather'
 ----------------------------------------------------------------------------
 -- stored procedure displaying number of days-off each employee had
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [YY, MM] e.g. [2022, 1]
 DROP PROCEDURE IF EXISTS daysOff;  
 GO  
@@ -112,3 +112,20 @@ GROUP BY E.name,E.surname
 GO 
 
 EXECUTE daysOff 2022, 1
+
+----------------------------------------------------------------------------
+-- stored procedure displaying a quick translation list for a given date
+-- arguments of the procedure are not mandatory value-wise (NULL is accepted)
+-- passed format is [YY-MM-DD] e.g. ['2022-01-01']
+DROP PROCEDURE IF EXISTS transactionsDay;  
+GO  
+CREATE PROCEDURE transactionsDay (@date DATE) 
+AS
+IF @date IS NULL SET @date = GETDATE()
+SELECT T.[date],T.employeeID,T.amount,T.productID,T.amount * (SELECT P.retailPrice 
+                                                                FROM Products P WHERE P.productID = T.productID) AS Price 
+FROM transactionList T WHERE T.[date] = @date
+GO 
+
+EXECUTE transactionsDay '2022-01-05'
+----------------------------------------------------------------------------

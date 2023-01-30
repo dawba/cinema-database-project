@@ -42,7 +42,7 @@ W takich warunkach koniecznym jest tworzenie kopii zapasowych bazy, zwłaszcza w
 ![images/database_schema.png](images/database_schema.png)
 
 ## Diagram ER
-//WIP
+![images/er_diagram.png](images/er_diagram.png)
 
 ## Widoki
 Utworzone widoki pozwalają na wyświetlanie uogólnionych danych, które
@@ -115,7 +115,7 @@ z obrotami kina czy aktualnym repertuarem.
 ```sql
 ----------------------------------------------------------------------------
 --1 function displaying revenue from showings
---  arguments of the function are not mandatory value-vise (NULL is accepted)
+--  arguments of the function are not mandatory value-wise (NULL is accepted)
 --  passed format is [YY, MM, DD] e.g. [2022, 1, 1] or [2022, NULL, NULL]
 DROP FUNCTION IF EXISTS dbo.incomeFromMovies;
 GO
@@ -163,7 +163,7 @@ SELECT * FROM incomeFromMovies(NULL, 1, 30)
 ```sql
 ----------------------------------------------------------------------------
 --2 function displaying ticket sale statistics for online and on-site sales
---  arguments of the function are not mandatory value-vise (NULL is accepted)
+--  arguments of the function are not mandatory value-wise (NULL is accepted)
 --  passed format is [YY, MM, DD, movie title] e.g. [2022, 1, 1, 'Django Unchained'] or [2022, NULL, NULL, NULL]
 DROP FUNCTION IF EXISTS dbo.ticketSaleStatisticComparison;
 GO
@@ -203,7 +203,7 @@ SELECT * FROM ticketSaleStatisticComparison(2022, 01, 24, NULL)
 ```sql
 ----------------------------------------------------------------------------
 --3 function calculating salaries for all employees
---  arguments of the function are not mandatory value-vise (NULL is accepted)
+--  arguments of the function are not mandatory value-wise (NULL is accepted)
 --  passed format is [YY, MM, DD] e.g. [2022, 1, 1] or [2022, NULL, NULL]
 DROP FUNCTION IF EXISTS dbo.employeeSalary;
 GO
@@ -247,7 +247,7 @@ SELECT * FROM employeeSalary(2022, NULL, NULL)
 ```sql
 ----------------------------------------------------------------------------
 --4 function calculating revenue from product sales
---  arguments of the function are not mandatory value-vise (NULL is accepted)
+--  arguments of the function are not mandatory value-wise (NULL is accepted)
 --  passed format is [YY, MM, DD] e.g. [2022, 1, 1] or [2022, NULL, NULL]
 DROP FUNCTION IF EXISTS dbo.productsIncome;
 GO 
@@ -279,7 +279,7 @@ SELECT * FROM productsIncome(2022, 1, 6)
 ```sql
 ----------------------------------------------------------------------------
 --5 function calculating expenses for ordered products
---  arguments of the function are not mandatory value-vise (NULL is accepted)
+--  arguments of the function are not mandatory value-wise (NULL is accepted)
 --  passed format is [YY, MM, DD] e.g. [2022, 1, 1] or [2022, NULL, NULL]
 DROP FUNCTION IF EXISTS dbo.productsExpense;
 GO 
@@ -311,7 +311,7 @@ SELECT * FROM productsExpense(NULL, NULL, NULL)
 ```sql
 ----------------------------------------------------------------------------
 --6 function displaying cinemas repertoire for selected time span
---  arguments of the function are mandatory value-vise
+--  arguments of the function are mandatory value-wise
 --  passed format is [YY-MM-DD, YY-MM-DD] e.g. [2022-01-01, 2022-03-04]
 DROP FUNCTION IF EXISTS dbo.cinemaRepertoire;
 GO 
@@ -347,7 +347,7 @@ wyświetlaniu dostępnych miejsc na konkretny seans.
 ```sql
 ----------------------------------------------------------------------------
 -- stored procedure generating income/expense balance
--- arguments of the procedure are not mandatory value-vise (NULL is accepted)
+-- arguments of the procedure are not mandatory value-wise (NULL is accepted)
 -- passed format is [YY, MM] e.g. [2022, 1] or [2022, NULL]
 DROP PROCEDURE IF EXISTS generateIncomeBalance;
 GO
@@ -377,7 +377,7 @@ EXECUTE generateIncomeBalance 2022, 1, 23
 ```sql
 ----------------------------------------------------------------------------
 -- stored procedure displaying available seats for selected showing
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [number] e.g. [23]
 DROP PROCEDURE IF EXISTS freeSeats;  
 GO  
@@ -433,7 +433,7 @@ EXECUTE freeSeats 1
 ```sql
 ----------------------------------------------------------------------------
 -- stored procedure displaying total movie income and sold tickets for selected movie
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [movie title] e.g. ['Django Unchained']
 DROP PROCEDURE IF EXISTS movieIncome;  
 GO  
@@ -456,7 +456,7 @@ EXECUTE movieIncome 'Godfather'
 ```sql
 ----------------------------------------------------------------------------
 -- stored procedure displaying number of days-off each employee had
--- arguments of the procedure are mandatory value-vise (NULL is not accepted)
+-- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [YY, MM] e.g. [2022, 1]
 DROP PROCEDURE IF EXISTS daysOff;  
 GO  
@@ -481,6 +481,27 @@ EXECUTE daysOff 2022, 1
 ```
 
 ![images/proc4.png](images/proc4.png)
+
+```sql
+----------------------------------------------------------------------------
+-- stored procedure displaying a quick translation list for a given date
+-- arguments of the procedure are not mandatory value-wise (NULL is accepted)
+-- passed format is [YY-MM-DD] e.g. ['2022-01-01']
+DROP PROCEDURE IF EXISTS transactionsDay;  
+GO  
+CREATE PROCEDURE transactionsDay (@date DATE) 
+AS
+IF @date IS NULL SET @date = GETDATE()
+SELECT T.[date],T.employeeID,T.amount,T.productID,T.amount * (SELECT P.retailPrice 
+                                                                FROM Products P WHERE P.productID = T.productID) AS Price 
+FROM transactionList T WHERE T.[date] = @date
+GO 
+
+EXECUTE transactionsDay '2022-01-05'
+----------------------------------------------------------------------------
+```
+
+![images/proc5.png](images/proc5.png)
 
 ## Wyzwalacze
 Przygotowane wyzwalacze są związane z aktualizowaniem i dodawaniem danych związanych z transakcjami/rezerwacją miejsc czy seansami.
@@ -604,6 +625,15 @@ GO
 Typowymi zapytaniami związanymi z bazą danych kina są między innymi zapytania o dostępność miejsca na seansie,
 listę dostępnych seansów wraz ze szczegółowymi informacjami dla kadego z nich. Równie często będą wykonywane
 zapytania dotyczące produktów i rezerwacji.
+
+## Indeksy
+Indeksy zostały utworzone na najczęściej używanych kolumnach - *nazwy filmów*, *imię* i *nazwisko* pracowników i klientów, *id* rezerwacji
+```sql
+CREATE INDEX movie ON Movies(movieTitle)
+CREATE INDEX employee ON Employees(name,surname)
+CREATE INDEX client ON Clients(name,surname)
+CREATE INDEX reservation ON Reservations(reservationID)
+```
 
 ## Skrypt tworzący bazę danych
 Baza danych i tabele:
