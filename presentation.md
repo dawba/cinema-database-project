@@ -39,7 +39,7 @@ W takich warunkach koniecznym jest tworzenie kopii zapasowych bazy, zwłaszcza w
 16. Cast - tabela wiążąca *aktorów* z *filmami* w postaci obsady filmu, zawierająca *numer filmu*, *numer aktora* oraz *rolę* przez niego graną. 
 
 ## Schemat bazy danych
-![database_schema.png](database_schema.png)
+![images/database_schema.png](images/database_schema.png)
 
 ## Diagram ER
 //WIP
@@ -60,7 +60,7 @@ GO
 ----------------------------------------------------------------------------
 ```
 
-![view1.png](view1.png)
+![images/view1.png](images/view1.png)
 
 ```sql
 ----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ GO
 ----------------------------------------------------------------------------
 ```
 
-![view2.png](view2.png)
+![images/view2.png](images/view2.png)
 
 ```sql
 --3 view displaying contacts to studios for which we have films with expired licenses
