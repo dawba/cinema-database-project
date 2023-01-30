@@ -346,7 +346,7 @@ wyświetlaniu dostępnych miejsc na konkretny seans.
 
 ```sql
 ----------------------------------------------------------------------------
--- stored procedure generating income/expense balance
+--1 stored procedure generating income/expense balance
 -- arguments of the procedure are not mandatory value-wise (NULL is accepted)
 -- passed format is [YY, MM] e.g. [2022, 1] or [2022, NULL]
 DROP PROCEDURE IF EXISTS generateIncomeBalance;
@@ -376,7 +376,7 @@ EXECUTE generateIncomeBalance 2022, 1, 23
 
 ```sql
 ----------------------------------------------------------------------------
--- stored procedure displaying available seats for selected showing
+--2 stored procedure displaying available seats for selected showing
 -- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [number] e.g. [23]
 DROP PROCEDURE IF EXISTS freeSeats;  
@@ -432,7 +432,7 @@ EXECUTE freeSeats 1
 
 ```sql
 ----------------------------------------------------------------------------
--- stored procedure displaying total movie income and sold tickets for selected movie
+--3 stored procedure displaying total movie income and sold tickets for selected movie
 -- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [movie title] e.g. ['Django Unchained']
 DROP PROCEDURE IF EXISTS movieIncome;  
@@ -455,7 +455,7 @@ EXECUTE movieIncome 'Godfather'
 
 ```sql
 ----------------------------------------------------------------------------
--- stored procedure displaying number of days-off each employee had
+--4 stored procedure displaying number of days-off each employee had
 -- arguments of the procedure are mandatory value-wise (NULL is not accepted)
 -- passed format is [YY, MM] e.g. [2022, 1]
 DROP PROCEDURE IF EXISTS daysOff;  
@@ -484,7 +484,7 @@ EXECUTE daysOff 2022, 1
 
 ```sql
 ----------------------------------------------------------------------------
--- stored procedure displaying a quick translation list for a given date
+--5 stored procedure displaying a quick translation list for a given date
 -- arguments of the procedure are not mandatory value-wise (NULL is accepted)
 -- passed format is [YY-MM-DD] e.g. ['2022-01-01']
 DROP PROCEDURE IF EXISTS transactionsDay;  
