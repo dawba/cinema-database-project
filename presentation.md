@@ -60,6 +60,8 @@ GO
 ----------------------------------------------------------------------------
 ```
 
+![view1.png](view1.png)
+
 ```sql
 ----------------------------------------------------------------------------
 --2 view displaying most watched movies in our cinema
@@ -72,6 +74,8 @@ CREATE View [MostViewedFilms] AS
 GO
 ----------------------------------------------------------------------------
 ```
+
+![view2.png](view2.png)
 
 ```sql
 --3 view displaying contacts to studios for which we have films with expired licenses
