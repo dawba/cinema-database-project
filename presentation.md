@@ -89,6 +89,8 @@ GO
 ----------------------------------------------------------------------------
 ```
 
+![images/view3.png](images/view3.png)
+
 ```sql
 ----------------------------------------------------------------------------
 --4 view displaying viewers who have watched more than half of our showings
@@ -102,6 +104,8 @@ CREATE View [MostLoyalClients] AS
 GO
 ----------------------------------------------------------------------------
 ```
+
+![images/view4.png](images/view4.png)
 
 ## Funkcje
 Zaprojektowane funkcje wykorzystywane są do wyświetlania konkretnych danych, z reguły związanych
